@@ -1,0 +1,74 @@
+@startuml
+!pragma layout smetana
+!include theme.puml
+hide circle
+class User <<model>> {
+  id : int
+  username : string?
+  phone : string?
+  address : string?
+  bio : string?
+  avatar_path : string?
+  --
+  +sentOrderMessages() : HasMany
+  +receivedTechnicianReviews() : HasMany
+  +authoredTechnicianReviews() : HasMany
+  +socialAccounts() : HasMany
+}
+class ServiceOrder <<model>> {
+  id : ULID
+  ticket_number : string
+  --
+  +messages() : HasMany
+  +technicianReviews() : HasMany
+}
+class OrderMessage <<model>> {
+  id : int
+  sender_id : int?
+  recipient_id : int?
+  body : string
+  read_at : datetime?
+  --
+  +order() : BelongsTo
+  +sender() : BelongsTo
+  +recipient() : BelongsTo
+}
+class TechnicianReview <<model>> {
+  id : int
+  customer_id : int?
+  technician_id : int
+  rating : int
+  quality_rating : int
+  communication_rating : int
+  punctuality_rating : int
+  --
+  +serviceOrder() : BelongsTo
+  +technician() : BelongsTo
+  +customer() : BelongsTo
+}
+class SocialAccount <<model>> {
+  id : int
+  provider : string
+  provider_user_id : string
+  provider_email : string?
+  --
+  +user() : BelongsTo
+}
+User "1" -- "0..*" SocialAccount : akun provider
+ServiceOrder "1" -- "0..*" OrderMessage : percakapan
+User "0..1" -- "0..*" OrderMessage : pengirim
+ServiceOrder "1" -- "0..*" TechnicianReview : penilaian
+User "1" -- "0..*" TechnicianReview : teknisi dinilai
+note bottom of OrderMessage
+  Asosiasi recipient juga ke User:
+  0..1 penerima per pesan; User menerima 0..* pesan.
+  Pesan pelanggan diarahkan ke PIC saat dikirim.
+  Chat terikat order, bukan satu ruang global.
+end note
+note bottom of TechnicianReview
+  Asosiasi customer juga ke User:
+  0..1 pelanggan per ulasan; User menulis 0..* ulasan.
+  Unik: (service_order_id, technician_id).
+  Rating 1-5; customer wajib saat membuat ulasan.
+end note
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+!include theme.puml
+|Teknisi|
+start
+:Buka tiket scheduled;
+:Ubah status menjadi on_the_way;
+repeat
+  :Ubah status menjadi in_progress;\nlaksanakan pekerjaan;
+  :Ajukan verifikasi\n(status verification);
+  |Pengelola|
+  :Periksa hasil pekerjaan;
+backward :Kembalikan status ke in_progress;
+repeat while (Perlu perbaikan?) is (ya) not (tidak)
+if (Perlu menunggu pembayaran?) then (ya)
+  :Ubah status ke waiting_payment;
+  :Konfirmasi pembayaran\nsecara operasional;
+endif
+:Ubah status menjadi completed;
+|Sistem|
+:Simpan completed_at,\nevent status, dan audit perubahan;
+|Pelanggan|
+if (Ingin memberi penilaian?) then (ya)
+  :Pilih teknisi penugasan;\nisi rating 1-5;\nkomentar opsional;
+  |Sistem|
+  :Validasi kepemilikan, status,\ndan riwayat penugasan;
+  :Simpan / perbarui ulasan\nper pesanan-teknisi dan audit;
+endif
+|Pengelola|
+:Lihat evaluasi bila tersedia;\nkelola garansi / penutupan;
+stop
+@enduml

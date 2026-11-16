@@ -1,0 +1,32 @@
+{
+    "name": "adcom-mobile",
+    "version": "0.1.0",
+    "private": true,
+    "description": "AD Com customer and technician Android application",
+    "license": "0BSD",
+    "main": "index.ts",
+    "scripts": {
+        "start": "expo start",
+        "android": "expo run:android",
+        "ios": "expo run:ios",
+        "typecheck": "tsc --noEmit",
+        "test": "node --experimental-strip-types --test src/*.test.mjs",
+        "export:android": "expo export --platform android",
+        "prebuild:android": "expo prebuild --platform android --no-install",
+        "routes": "cd ../.. && php artisan wayfinder:generate --path=apps/mobile/src/generated --skip-actions --no-interaction"
+    },
+    "dependencies": {
+        "expo": "~57.0.20",
+        "expo-image-picker": "~57.0.16",
+        "expo-linear-gradient": "~57.0.1",
+        "expo-secure-store": "~57.0.3",
+        "expo-status-bar": "~57.0.1",
+        "react": "19.2.3",
+        "react-native": "0.86.3",
+        "react-native-safe-area-context": "~5.7.0"
+    },
+    "devDependencies": {
+        "@types/react": "~19.2.2",
+        "typescript": "~6.0.3"
+    }
+}

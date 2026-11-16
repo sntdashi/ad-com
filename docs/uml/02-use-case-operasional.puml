@@ -1,0 +1,54 @@
+@startuml
+!pragma layout smetana
+!include theme.puml
+left to right direction
+actor "Pengelola pesanan\n<<abstrak>>" as Manager
+actor "Operator" as Operator
+actor "Admin" as Admin
+actor "Supervisor" as Supervisor
+actor "Teknisi" as Tech
+actor "Gudang" as Stock
+rectangle "AD Com - Operasional (web)" {
+  usecase "UC11\nMelihat dan memperbarui\nstatus pesanan" as Orders
+  usecase "UC12\nMenetapkan PIC dan\nanggota tim teknisi" as Assign
+  usecase "UC13\nChat tiket yang\ndiizinkan" as Chat
+  usecase "UC14\nMelihat evaluasi\nperforma teknisi" as Performance
+  usecase "UC15\nMelihat persediaan" as ViewStock
+  usecase "UC16\nMenambah barang dan\nmencatat mutasi stok" as ManageStock
+  usecase "UC17\nMencatat transaksi dan\nmelihat keuangan" as Finance
+  usecase "UC18\nMemverifikasi / menolak\ntransaksi pending" as Verify
+  usecase "UC19\nMengubah role, profil\noperasional, dan keaktifan akun" as Team
+}
+Operator --|> Manager
+Admin --|> Manager
+Supervisor --|> Manager
+Manager -- Orders
+Manager -- Assign
+Manager -- Chat
+Manager -- Performance
+Manager -- ViewStock
+Tech -- Orders
+Tech -- Chat
+Tech -- Performance
+Tech -- ViewStock
+Stock -- ViewStock
+Stock -- ManageStock
+Admin -- ManageStock
+Operator -- ManageStock
+Admin -- Finance
+Operator -- Finance
+Operator -- Verify
+Admin -- Team
+Operator -- Team
+note bottom of Orders
+  Teknisi: hanya tiket penugasan aktif / PIC.
+  Transisi teknisi: scheduled -> on_the_way
+  -> in_progress -> verification.
+  Pengelola menentukan hasil verifikasi.
+end note
+note bottom of Team
+  Hanya operator boleh mengelola role operator.
+  Admin tidak boleh mengubah akun operator.
+  Tidak boleh mengubah akun sendiri di menu tim.
+end note
+@enduml

@@ -1,0 +1,45 @@
+@startuml
+!include theme.puml
+hide footbox
+autonumber
+actor Pemohon
+boundary "booking.tsx\n(form web)" as UI
+control "Laravel HTTP\nRequest + Controller" as HTTP
+control "CreateServiceOrder" as Action
+database "Database" as DB
+Pemohon -> UI : Isi dan kirim formulir
+UI -> HTTP : POST /pesan
+activate HTTP
+HTTP -> HTTP : StoreServiceOrderRequest\nnormalisasi + validasi
+HTTP -> DB : Periksa layanan aktif
+DB --> HTTP : Hasil pemeriksaan
+alt Data tidak valid
+  HTTP --> UI : Redirect kembali + error sesi
+  UI --> Pemohon : Tampilkan pesan validasi
+else Data valid
+  HTTP -> Action : handle(data, user atau null)
+  activate Action
+  Action -> Action : Buat token acak dan kode akses
+  group Transaksi database (atomik)
+    Action -> DB : BEGIN; baca ulang layanan aktif
+    DB --> Action : Service
+    Action -> Action : Buat nomor tiket
+    Action -> DB : INSERT service_orders\nstatus new; hanya hash token/kode
+    Action -> DB : INSERT order_status_events\nstatus new; visibility customer
+    Action -> DB : COMMIT
+  end
+  Action --> HTTP : order + tracking_token + access_code
+  deactivate Action
+  HTTP --> UI : Redirect /lacak/t/{token}\nflash nomor tiket + kode akses
+  UI -> HTTP : GET /lacak/t/{token}
+  HTTP -> DB : Cari order dengan hash token
+  DB --> HTTP : Order dan data pelacakan yang diizinkan
+  HTTP --> UI : track-show + nomor tiket + kode akses awal
+  UI --> Pemohon : Tampilkan tiket; minta simpan kode akses
+end
+deactivate HTTP
+note over Action, DB
+  Kegagalan dalam transaksi membatalkan penyimpanan.
+  Nomor tiket/kode pada diagram adalah nama data, bukan kredensial nyata.
+end note
+@enduml

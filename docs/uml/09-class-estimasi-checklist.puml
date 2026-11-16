@@ -1,0 +1,61 @@
+@startuml
+!pragma layout smetana
+!include theme.puml
+hide circle
+class Service <<model>> {
+  id : int
+  name : string
+  --
+  +checklistTemplates() : HasMany
+}
+class ServiceOrder <<model>> {
+  id : ULID
+  ticket_number : string
+  --
+  +estimates() : HasMany
+}
+class Estimate <<model>> {
+  id : ULID
+  version : int
+  status : string
+  total : int
+  approved_at : datetime?
+  --
+  +order() : BelongsTo
+  +items() : HasMany
+}
+class EstimateItem <<model>> {
+  id : int
+  label : string
+  quantity : decimal
+  unit_price : int
+  total : int
+  --
+  +estimate() : BelongsTo
+}
+class ChecklistTemplate <<model>> {
+  id : int
+  item_key : string
+  title : string
+  standard_code : string?
+  requires_evidence : bool
+  is_required : bool
+  --
+  +service() : BelongsTo
+}
+Service "1" -- "0..*" ServiceOrder : layanan
+ServiceOrder "1" -- "0..*" Estimate : versi estimasi
+Estimate "1" -- "0..*" EstimateItem : rincian
+Service "1" -- "0..*" ChecklistTemplate : standar layanan
+note bottom of Estimate
+  Model dan pembacaan data tersedia.
+  Endpoint pengelolaan/persetujuan estimasi
+  mandiri belum tersedia di routes/web.php.
+end note
+note bottom of ChecklistTemplate
+  Model dan template tersedia.
+  Workflow pengisian checklist lengkap belum
+  dipetakan sebagai use case aktif.
+  Standard_code bukan nilai akademik siswa.
+end note
+@enduml

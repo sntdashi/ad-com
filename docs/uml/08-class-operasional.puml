@@ -1,0 +1,65 @@
+@startuml
+!pragma layout smetana
+!include theme.puml
+hide circle
+class User <<model>> {
+  id : int
+  role : string
+}
+class ServiceOrder <<model>> {
+  id : ULID
+  ticket_number : string
+  --
+  +inventoryMovements() : HasMany
+  +financialTransactions() : HasMany
+}
+class InventoryItem <<model>> {
+  id : int
+  sku : string
+  name : string
+  quantity_on_hand : int
+  reorder_level : int
+  unit_cost : int
+  --
+  +movements() : HasMany
+}
+class InventoryMovement <<model>> {
+  id : int
+  type : string
+  quantity : int
+  balance_after : int
+  occurred_at : datetime
+  --
+  +item() : BelongsTo
+  +order() : BelongsTo
+  +actor() : BelongsTo
+}
+class FinancialTransaction <<model>> {
+  id : int
+  type : string
+  amount : int
+  payment_method : string
+  status : string
+  verified_at : datetime?
+  --
+  +order() : BelongsTo
+  +actor() : BelongsTo
+  +verifier() : BelongsTo
+}
+InventoryItem "1" -- "0..*" InventoryMovement : mutasi
+ServiceOrder "0..1" -- "0..*" InventoryMovement : pemakaian terkait tiket
+ServiceOrder "0..1" -- "0..*" FinancialTransaction : transaksi terkait tiket
+User "0..1" -- "0..*" InventoryMovement : actor
+User "0..1" -- "0..*" FinancialTransaction : actor
+note bottom of FinancialTransaction
+  Asosiasi verifier juga ke User:
+  0..1 verifier per transaksi; User memverifikasi 0..* transaksi.
+  Transaksi dibuat pending; operator memverifikasi/menolak.
+  Nominal disimpan sebagai integer rupiah.
+end note
+note bottom of InventoryMovement
+  stock_in / stock_out.
+  Mutasi dan saldo barang diperbarui atomik.
+  Pengeluaran melebihi stok ditolak.
+end note
+@enduml

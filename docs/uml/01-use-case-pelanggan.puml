@@ -1,0 +1,44 @@
+@startuml
+!pragma layout smetana
+!include theme.puml
+left to right direction
+actor "Pengunjung" as Guest
+actor "Pelanggan\n(customer)" as Customer
+actor "Pengguna akun\n(semua role)" as Account
+actor "Google" as Google
+rectangle "AD Com - Portal layanan TEFA TKJ" {
+  usecase "UC01\nMelihat layanan" as Browse
+  usecase "UC02\nMengajukan pesanan" as Book
+  usecase "UC03\nMelacak tiket dengan\nkredensial pelacakan" as Track
+  usecase "UC04\nBertanya kepada ADI" as AI
+  usecase "UC05\nMendaftar / masuk akun" as Login
+  usecase "UC06\nMasuk melalui Google" as OAuth
+  usecase "UC07\nMengelola profil dan\npengaturan akun sendiri" as Profile
+  usecase "UC08\nMelihat pesanan sendiri" as Own
+  usecase "UC09\nChat pada tiket sendiri" as Chat
+  usecase "UC10\nMemberi / mengubah\nrating teknisi" as Review
+}
+Guest -- Browse
+Guest -- Book
+Guest -- Track
+Guest -- AI
+Guest -- Login
+Customer --|> Guest
+Customer -- Own
+Customer -- Chat
+Customer -- Review
+Account -- Profile
+Google -- OAuth
+OAuth ..> Login : <<extend>>\n[pilih Google]
+note bottom of Review
+  Pemilik pesanan; status completed,
+  warranty, atau closed; teknisi pernah
+  ditugaskan; satu ulasan per pasangan
+  pesanan-teknisi (dapat diperbarui).
+end note
+note bottom of Chat
+  Akun pelanggan terverifikasi.
+  PIC harus sudah ditugaskan.
+  Pelacakan tamu bukan akses chat.
+end note
+@enduml

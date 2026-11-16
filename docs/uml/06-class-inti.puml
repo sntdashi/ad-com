@@ -1,0 +1,74 @@
+@startuml
+!pragma layout smetana
+!include theme.puml
+hide circle
+class User <<model>> {
+  id : int
+  name : string
+  role : string
+  is_active : bool
+  --
+  +orderAssignments() : HasMany
+  +socialAccounts() : HasMany
+}
+class Service <<model>> {
+  id : int
+  name : string
+  service_mode : string
+  is_active : bool
+  --
+  +orders() : HasMany
+  +checklistTemplates() : HasMany
+}
+class ServiceOrder <<model>> {
+  id : ULID
+  ticket_number : string
+  customer_id : int?
+  assigned_technician_id : int?
+  supervisor_id : int?
+  status : string
+  complaint : string
+  --
+  +customer() : BelongsTo
+  +assignedTechnician() : BelongsTo
+  +supervisor() : BelongsTo
+  +activeTechnicianAssignments() : HasMany
+  +statusEvents() : HasMany
+}
+class OrderAssignment <<model>> {
+  id : int
+  assignment_role : string
+  assigned_at : datetime
+  released_at : datetime?
+  --
+  +serviceOrder() : BelongsTo
+  +user() : BelongsTo
+}
+class OrderStatusEvent <<model>> {
+  id : int
+  status : string
+  visibility : string
+  occurred_at : datetime
+  --
+  +order() : BelongsTo
+  +actor() : BelongsTo
+}
+Service "1" -- "0..*" ServiceOrder : layanan
+User "0..1" -- "0..*" ServiceOrder : customer
+ServiceOrder "1" -- "0..*" OrderAssignment : assignments
+User "1" -- "0..*" OrderAssignment : anggota
+ServiceOrder "1" -- "0..*" OrderStatusEvent : timeline
+User "0..1" -- "0..*" OrderStatusEvent : actor
+note bottom of ServiceOrder
+  Dua asosiasi User lain diringkas di sini:
+  assignedTechnician: 0..1 PIC per order;
+  supervisor: 0..1 supervisor per order.
+  Masing-masing User dapat menangani 0..* order.
+  Pesanan tamu boleh tanpa customer_id.
+end note
+note bottom of OrderAssignment
+  Unik: (service_order_id, user_id, assignment_role).
+  Penugasan aktif: released_at = null.
+  Tidak ada kelas/tabel TechnicianTeam tersendiri.
+end note
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+!include theme.puml
+|Pemohon|
+start
+:Pilih layanan aktif;
+repeat
+  :Isi kontak dan keluhan;\npilih mode layanan;\nsetujui privasi;
+  |Sistem|
+  :Validasi formulir\ndan layanan aktif;
+  backward :Tampilkan kesalahan validasi;
+repeat while (Data tidak valid?) is (ya) not (tidak)
+:Buat tiket status new;\nsimpan hash token/kode\ndan event awal secara atomik;
+|Pemohon|
+:Terima tiket, kode akses,\ndan halaman pelacakan;
+|Pengelola|
+if (Permintaan dibatalkan?) then (ya)
+  :Ubah status ke cancelled;
+  stop
+else (tidak)
+  if (Perlu informasi tambahan?) then (ya)
+    :Status needs_info;\nminta informasi tambahan;
+  endif
+  :Ubah status ke triaged;
+  if (Perlu estimasi / persetujuan?) then (ya)
+    :waiting_estimate (opsional)\nlalu waiting_approval;\nkonfirmasi biaya ke pemohon;
+    if (Dilanjutkan?) then (tidak)
+      :Ubah status ke cancelled;
+      stop
+    endif
+  endif
+  :Tetapkan PIC dan anggota;\nkonfirmasi jadwal;\nstatus scheduled;
+  :Lanjut ke diagram pengerjaan (04);
+  stop
+endif
+@enduml
